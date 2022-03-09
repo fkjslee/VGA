@@ -21,8 +21,8 @@ class Voice(VoiceInterface):
         with open("article.txt", "r", encoding="utf-8") as f:
             content = f.readlines()
         with open("article.txt", "w+", encoding="utf-8") as f:
-            content.append(sentence)
             f.writelines(content)
+            f.write(sentence + "\n")
 
     def delete_sentence(self):
         with open("article.txt", "r", encoding="utf-8") as f:
@@ -51,10 +51,12 @@ while True:
         import json
         result = json.loads(result)
         intent = result['intent']
-        if intent == "add_sentence" or intent == "delete_sentence":
+        if intent == "add_sentence":
             sentence = result['sentence']
             voice_command.add_sentence(sentence)
             print("intent = ", intent)
             print("sentence = ", sentence)
+        elif intent == "delete_sentence":
+            voice_command.delete_sentence()
     except Exception as e:
         print(e)
