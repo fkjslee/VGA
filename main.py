@@ -1,62 +1,29 @@
-from abc import ABC, abstractmethod
 import time
-
-
-class VoiceInterface(ABC):
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def add_sentence(self, sentence):
-        pass
-
-    @abstractmethod
-    def delete_sentence(self):
-        pass
-
-
-class Voice(VoiceInterface):
-
-    def add_sentence(self, sentence):
-        with open("article.txt", "r", encoding="utf-8") as f:
-            content = f.readlines()
-        with open("article.txt", "w+", encoding="utf-8") as f:
-            f.writelines(content)
-            f.write(sentence + "\n")
-
-    def delete_sentence(self):
-        with open("article.txt", "r", encoding="utf-8") as f:
-            content = f.readlines()
-        with open("article.txt", "w+", encoding="utf-8") as f:
-            f.writelines(content[0:-1])
-
-
-
-# if __name__ == "__main__":
-#     client = Client()
-#     while True:
-#         return_msg = client.sendMsg("nothing")
-#         print(return_msg)
-
-
+from voiceInterface import Voice
 import sys
 sys.path.append("./network")
 from network import Server
 import time
+import json
 
-voice_command = Voice()
-while True:
-    try:
-        result = Server.receive_msg()
-        import json
-        result = json.loads(result)
-        intent = result['intent']
-        if intent == "add_sentence":
-            sentence = result['sentence']
-            voice_command.add_sentence(sentence)
-            print("intent = ", intent)
-            print("sentence = ", sentence)
-        elif intent == "delete_sentence":
-            voice_command.delete_sentence()
-    except Exception as e:
-        print(e)
+
+if __name__ == "__main__":
+    voice_command = Voice()
+    while True:
+        try:
+            result = Server.receive_msg()
+            result = json.loads(result)
+            intent = result['intent']
+            if intent == "add_sentence":
+                sentence = result['sentence']
+                rtn_msg = voice_command.add_sentence(sentence)
+            elif intent == "delete_sentence":
+                rtn_msg = voice_command.delete_sentence()
+            elif intent == "modify":
+                rtn_msg = voice_command.modify_sentence(result.get("S-wrong-word"), result.get("S-right-word"))
+            else:
+                print("error command!")
+                continue
+            print(rtn_msg)
+        except Exception as e:
+            print(e)
